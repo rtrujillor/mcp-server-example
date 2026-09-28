@@ -1,0 +1,84 @@
+{
+  "last_updated": "2026-02-01",
+  "plans": {
+    "starter": {
+      "core_features": [
+        "Project management",
+        "Basic reporting",
+        "Email notifications"
+      ],
+      "analytics": [
+        "Standard dashboards",
+        "Weekly reports"
+      ],
+      "security": [
+        "Password-based authentication",
+        "Standard data encryption"
+      ],
+      "support": [
+        "Email support",
+        "Community documentation"
+      ],
+      "integrations": [
+        "Slack",
+        "Email"
+      ]
+    },
+    "professional": {
+      "core_features": [
+        "Advanced project management",
+        "Custom workflows",
+        "Automation rules"
+      ],
+      "analytics": [
+        "Advanced dashboards",
+        "Real-time metrics",
+        "Export to CSV"
+      ],
+      "security": [
+        "Role-based access control (RBAC)",
+        "Audit logs",
+        "Enhanced encryption"
+      ],
+      "support": [
+        "Priority email support",
+        "Response time SLA"
+      ],
+      "integrations": [
+        "Slack",
+        "Email",
+        "Jira",
+        "GitHub"
+      ]
+    },
+    "enterprise": {
+      "core_features": [
+        "Unlimited projects",
+        "Custom workflows",
+        "Advanced automation"
+      ],
+      "analytics": [
+        "Custom dashboards",
+        "Advanced reporting",
+        "Data export (CSV, JSON)"
+      ],
+      "security": [
+        "Single Sign-On (SSO)",
+        "Advanced audit logs",
+        "Custom security policies"
+      ],
+      "support": [
+        "Dedicated support manager",
+        "24/7 support",
+        "Custom SLAs"
+      ],
+      "integrations": [
+        "Slack",
+        "Email",
+        "Jira",
+        "GitHub",
+        "Custom integrations"
+      ]
+    }
+  }
+}

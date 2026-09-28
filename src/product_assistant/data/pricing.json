@@ -1,0 +1,81 @@
+{
+  "currency": "EUR",
+  "billing_cycles": [
+    "monthly",
+    "yearly"
+  ],
+  "last_updated": "2026-02-01",
+  "pricing_model": "per_user",
+  "plans": [
+    {
+      "plan_id": "starter",
+      "base_price": {
+        "monthly": 29,
+        "yearly": 290
+      },
+      "per_user_price": {
+        "monthly": 5,
+        "yearly": 50
+      },
+      "per_api_request_price": {
+        "monthly": 0.001,
+        "yearly": 0.001
+      },
+      "minimum_users": 1,
+      "maximum_users": 5,
+      "discounts": []
+    },
+    {
+      "plan_id": "professional",
+      "base_price": {
+        "monthly": 79,
+        "yearly": 790
+      },
+      "per_user_price": {
+        "monthly": 4,
+        "yearly": 40
+      },
+      "per_api_request_price": {
+        "monthly": 0.0001,
+        "yearly": 0.0001
+      },
+      "minimum_users": 5,
+      "maximum_users": 25,
+      "discounts": [
+        {
+          "type": "volume",
+          "condition": "users >= 20",
+          "percentage": 10
+        }
+      ]
+    },
+    {
+      "plan_id": "enterprise",
+      "base_price": {
+        "monthly": null,
+        "yearly": null
+      },
+      "per_user_price": {
+        "monthly": null,
+        "yearly": null
+      },
+      "per_api_request_price": {
+        "monthly": null,
+        "yearly": null
+      },
+      "minimum_users": 25,
+      "maximum_users": null,
+      "discounts": [
+        {
+          "type": "custom",
+          "description": "Pricing defined by contract"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Yearly billing includes a discount equivalent to two free months.",
+    "Prices exclude VAT.",
+    "Enterprise pricing requires sales approval."
+  ]
+}

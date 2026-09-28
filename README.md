@@ -1,0 +1,169 @@
+# PoC - MCP Product Assistant
+
+MCP Product Assistant is a proof of concept MCP server for a SaaS sales use case.
+
+It allows an agent/LLM to:
+- query real data on plans, features, and pricing,
+- calculate traceable quotes,
+- estimate quick operational costs (what-if),
+- and generate guided prompts for pitch and comparison.
+
+Not a full chatbot: it's a layer of MCP capabilities (resources + tools + prompts).
+
+## Features
+
+- 3 read-only resources: `plans://all`, `features://by_plan`, `pricing://current`.
+- 2 business tools: `generate_quote(...)` and `estimate_cost(...)`.
+- 2 prompts: `sales_pitch(plan_id)` and `comparison_table()`.
+- Seed data in JSON under `src/product_assistant/data/`.
+- Unit tests for resources, tools, and prompts.
+
+## Local execution
+
+### Prerequisites
+
+- Python `>= 3.14`
+- `uv`
+
+### Clone the repository
+
+```bash
+git clone url_of_this_repository
+
+cd global-mcp-poc
+```
+
+### Installation
+
+```bash
+uv sync
+```
+
+### Run tests
+
+```bash
+uv run pytest -q
+```
+
+### Run MCP server
+
+Inspector mode (development):
+
+```bash
+uv run mcp dev ./src/product_assistant/server.py
+```
+
+Installed script mode:
+
+```bash
+uv run product-assistant-mcp
+```
+
+## Quick architecture
+
+- Entry point MCP: `src/product_assistant/server.py`
+- Resources: `src/product_assistant/resources/`
+- Tools: `src/product_assistant/tools/`
+- Prompts: `src/product_assistant/prompts/`
+- Typed models (Pydantic): `src/product_assistant/models/`
+- Business rules (pricing/validation/discounts): `src/product_assistant/services/`
+
+## Resources
+
+### `plans://all`
+Returns the catalog of plans with:
+- `id`, `name`, `description`
+- `limits` (users, projects, api_requests_per_month)
+- `recommended_for`
+
+### `features://by_plan`
+Returns features by plan, grouped by category:
+- `core_features`
+- `analytics`
+- `security`
+- `support`
+- `integrations`
+
+### `pricing://current`
+Returns current pricing with:
+- `currency`, `billing_cycles`, `pricing_model`, `notes`
+- per plan: `base_price`, `per_user_price`, `per_api_request_price`, limits, and discounts
+
+## Tools
+
+### `generate_quote(plan_id, users, billing_cycle)`
+
+Calculates a formal and traceable quote.
+
+Current behavior:
+- Validates `users >= 1`.
+- Checks for the existence of the plan in `plans://all` and `pricing://current`.
+- Uses prices from the requested billing cycle (`monthly` or `yearly`).
+- Applies volume discounts when applicable.
+- Returns `valid_until` (today + 14 days), `trace`, and `notes`.
+- If plan limits are exceeded, returns `valid=false` but keeps the calculation.
+- If pricing is custom (e.g., enterprise), returns an explainable error.
+
+Minimal example:
+
+```json
+{
+  "plan_id": "professional",
+  "users": 22,
+  "billing_cycle": "monthly"
+}
+```
+
+### `estimate_cost(plan, usage)`
+
+Calculates a quick operational estimate (not a formal quote).
+
+Current behavior:
+- Always calculates with `monthly` cycle.
+- Validates limits using `plans://all` (users/projects/api_requests_per_month).
+- Calculates base lines + per user + (optional) per API request.
+- Includes `trace`, `notes`, and `valid`.
+- If pricing is custom, returns an explainable error.
+
+Minimal example:
+
+```json
+{
+  "plan": "professional",
+  "usage": {
+    "users": 22,
+    "projects": 5,
+    "api_requests_per_month": 100000
+  }
+}
+```
+
+## Prompts
+
+### `sales_pitch(plan_id)`
+
+Generates a prompt for the LLM to draft a brief sales pitch, with guardrails:
+- use only data from `plans://all` and `features://by_plan`,
+- do not invent capabilities,
+- do not mention prices,
+- redirect pricing inquiries to `generate_quote`.
+
+### `comparison_table()`
+
+Generates a prompt to enforce a Markdown comparison table of plans:
+- fixed business columns,
+- use only real data,
+- missing values as `N/A` or `custom/contact sales`,
+- close with a short conclusion.
+
+## Example data
+
+The PoC data is located in:
+- `src/product_assistant/data/plans.json`
+- `src/product_assistant/data/pricing.json`
+- `src/product_assistant/data/features.json`
+
+## Contribution
+
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+

@@ -1,0 +1,79 @@
+{
+  "plans": [
+    {
+      "id": "starter",
+      "name": "Starter",
+      "description": "Basic plan for small teams getting started.",
+      "price": {
+        "currency": "EUR",
+        "monthly": 29,
+        "yearly": 290
+      },
+      "limits": {
+        "users": 5,
+        "projects": 3,
+        "api_requests_per_month": 10000
+      },
+      "features": [
+        "Basic analytics",
+        "Email support",
+        "Standard security"
+      ],
+      "recommended_for": [
+        "Small teams",
+        "Early-stage projects"
+      ]
+    },
+    {
+      "id": "professional",
+      "name": "Professional",
+      "description": "Advanced features for growing teams.",
+      "price": {
+        "currency": "EUR",
+        "monthly": 79,
+        "yearly": 790
+      },
+      "limits": {
+        "users": 25,
+        "projects": 20,
+        "api_requests_per_month": 100000
+      },
+      "features": [
+        "Advanced analytics",
+        "Priority email support",
+        "Role-based access control",
+        "Audit logs"
+      ],
+      "recommended_for": [
+        "Growing teams",
+        "Production workloads"
+      ]
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "description": "Custom plan for large organizations with advanced needs.",
+      "price": {
+        "currency": "EUR",
+        "monthly": null,
+        "yearly": null
+      },
+      "limits": {
+        "users": "unlimited",
+        "projects": "unlimited",
+        "api_requests_per_month": "custom"
+      },
+      "features": [
+        "All Professional features",
+        "Single Sign-On (SSO)",
+        "Dedicated support",
+        "Custom SLAs",
+        "Advanced security controls"
+      ],
+      "recommended_for": [
+        "Large enterprises",
+        "Regulated environments"
+      ]
+    }
+  ]
+}
