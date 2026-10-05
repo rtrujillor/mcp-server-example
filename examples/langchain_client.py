@@ -23,19 +23,6 @@ def parse_args() -> argparse.Namespace:
         description="Ask a local model about the Product Assistant catalog."
     )
     parser.add_argument("prompt", nargs="?", default=DEFAULT_PROMPT)
-    parser.add_argument(
-        "--provider",
-        choices=("lm_studio", "ollama"),
-        help="Model provider (default: MODEL_PROVIDER or lm_studio)",
-    )
-    parser.add_argument(
-        "--model",
-        help="Model identifier (overrides MODEL_NAME and provider-specific settings)",
-    )
-    parser.add_argument(
-        "--base-url",
-        help="Provider API URL (overrides MODEL_BASE_URL)",
-    )
     return parser.parse_args()
 
 
@@ -91,11 +78,7 @@ async def main() -> None:
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
     args = parse_args()
     try:
-        settings = ModelSettings.from_env(
-            provider=args.provider,
-            model=args.model,
-            base_url=args.base_url,
-        )
+        settings = ModelSettings.from_env()
         answer = await run(args.prompt, settings)
     except Exception as exc:
         print(f"Client failed: {exc}", file=sys.stderr)

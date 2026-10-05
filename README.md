@@ -87,16 +87,23 @@ The model must support tool calling. Provider selection and connection settings
 live in the repository's `.env` file:
 
 ```dotenv
-# LM Studio (default)
-MODEL_PROVIDER=lm_studio
+# Change only this flag to select the provider: LM or OLLAMA
+MODEL_PROVIDER=LM
+
+# LM Studio configuration
 LM_STUDIO_MODEL=local-model
 LM_STUDIO_BASE_URL=http://localhost:1234/v1
+LM_STUDIO_API_KEY=lm-studio
 
-# To use Ollama instead:
-# MODEL_PROVIDER=ollama
-# OLLAMA_MODEL=llama3.1
-# OLLAMA_BASE_URL=http://localhost:11434
+# Ollama configuration
+OLLAMA_MODEL=llama3.1
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_API_KEY=
 ```
+
+Both configuration blocks stay defined. To switch to Ollama, change only the
+selector to `MODEL_PROVIDER=OLLAMA`. The client then reads the Ollama variables
+and credentials; it does not use the LM Studio configuration.
 
 For example, download and run an Ollama model before selecting it:
 
@@ -104,20 +111,17 @@ For example, download and run an Ollama model before selecting it:
 ollama pull llama3.1
 ```
 
-The generic `MODEL_NAME` and `MODEL_BASE_URL` variables override the selected
-provider's corresponding variables. Command-line options take highest
-precedence, so one-off overrides remain possible:
+Run the client normally after selecting the provider in `.env`:
 
 ```bash
 uv run --group client python examples/langchain_client.py \
-  --provider ollama \
-  --model llama3.1 \
   "Create a yearly quote for 30 users on the professional plan."
 ```
 
-If LM Studio requires authentication, set `LM_STUDIO_API_KEY`; otherwise the
-client supplies a harmless placeholder key. You do not need to start the MCP
-server separately: the LangChain MCP adapter launches it for each MCP session.
+`LM_STUDIO_API_KEY` and `OLLAMA_API_KEY` are independent. An empty
+`OLLAMA_API_KEY` is appropriate for a local Ollama server; when populated, it
+is sent as a bearer token. You do not need to start the MCP server separately:
+the LangChain MCP adapter launches it for each MCP session.
 
 ## Quick architecture
 

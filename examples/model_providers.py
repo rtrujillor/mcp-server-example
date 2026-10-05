@@ -13,43 +13,42 @@ from langchain_openai import ChatOpenAI
 
 @dataclass(frozen=True)
 class ModelSettings:
-    """Provider-neutral model configuration."""
+    """Configuration loaded for the provider selected in .env."""
 
     provider: str
     model: str
     base_url: str
+    api_key: str
 
     @classmethod
-    def from_env(
-        cls,
-        *,
-        provider: str | None = None,
-        model: str | None = None,
-        base_url: str | None = None,
-    ) -> ModelSettings:
-        provider_name = (provider or os.getenv("MODEL_PROVIDER", "lm_studio")).lower()
-
-        defaults = {
-            "lm_studio": (
-                os.getenv("LM_STUDIO_MODEL", "local-model"),
-                os.getenv("LM_STUDIO_BASE_URL", "http://localhost:1234/v1"),
-            ),
-            "ollama": (
-                os.getenv("OLLAMA_MODEL", "llama3.1"),
-                os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
-            ),
+    def from_env(cls) -> ModelSettings:
+        selected_provider = os.getenv("MODEL_PROVIDER", "LM").strip().upper()
+        provider_aliases = {
+            "LM": "lm_studio",
+            "LM_STUDIO": "lm_studio",
+            "OLLAMA": "ollama",
         }
-        if provider_name not in defaults:
-            supported = ", ".join(defaults)
+        if selected_provider not in provider_aliases:
             raise ValueError(
-                f"Unsupported MODEL_PROVIDER '{provider_name}'. Choose one of: {supported}"
+                f"Unsupported MODEL_PROVIDER '{selected_provider}'. Choose LM or OLLAMA."
             )
 
-        default_model, default_base_url = defaults[provider_name]
+        provider_name = provider_aliases[selected_provider]
+        if provider_name == "lm_studio":
+            return cls(
+                provider=provider_name,
+                model=os.getenv("LM_STUDIO_MODEL", "local-model"),
+                base_url=os.getenv(
+                    "LM_STUDIO_BASE_URL", "http://localhost:1234/v1"
+                ),
+                api_key=os.getenv("LM_STUDIO_API_KEY", "lm-studio"),
+            )
+
         return cls(
             provider=provider_name,
-            model=model or os.getenv("MODEL_NAME", default_model),
-            base_url=base_url or os.getenv("MODEL_BASE_URL", default_base_url),
+            model=os.getenv("OLLAMA_MODEL", "llama3.1"),
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            api_key=os.getenv("OLLAMA_API_KEY", ""),
         )
 
 
@@ -66,16 +65,23 @@ class LMStudioProvider(ModelProvider):
         return ChatOpenAI(
             model=settings.model,
             base_url=settings.base_url,
-            api_key=os.getenv("LM_STUDIO_API_KEY", "lm-studio"),
+            api_key=settings.api_key,
             temperature=0,
         )
 
 
 class OllamaProvider(ModelProvider):
     def create_model(self, settings: ModelSettings) -> BaseChatModel:
+        client_kwargs = {}
+        if settings.api_key:
+            client_kwargs["headers"] = {
+                "Authorization": f"Bearer {settings.api_key}"
+            }
         return ChatOllama(
             model=settings.model,
             base_url=settings.base_url,
+            client_kwargs=client_kwargs,
+            async_client_kwargs=client_kwargs,
             temperature=0,
         )
 
