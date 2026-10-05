@@ -125,6 +125,20 @@ the LangChain MCP adapter launches it for each MCP session.
 
 ## Quick architecture
 
+![MCP Product Assistant architecture](docs/architecture.png)
+
+The diagram follows the Ollama path selected by `MODEL_PROVIDER=OLLAMA`. The
+same provider factory can create the LM Studio client instead, without changing
+the agent or MCP integration. The LangChain client starts the MCP server as a
+child process and communicates with it over `stdio`; catalog resources become
+grounding context, while MCP tools remain callable operations chosen by the
+model.
+
+The editable draw.io source is available at
+[`docs/architecture.drawio`](docs/architecture.drawio). Open it in
+[draw.io](https://app.diagrams.net/) to change the layout or export another
+format.
+
 - Entry point MCP: `src/product_assistant/server.py`
 - Resources: `src/product_assistant/resources/`
 - Tools: `src/product_assistant/tools/`

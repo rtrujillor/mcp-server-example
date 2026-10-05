@@ -1,0 +1,103 @@
+<mxfile host="65bd71144e">
+    <diagram id="mcp-product-assistant" name="Runtime architecture">
+        <mxGraphModel dx="1077" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="800" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#172B4D;" value="MCP Product Assistant — local agent runtime" vertex="1">
+                    <mxGeometry height="40" width="700" x="350" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="client-zone" parent="1" style="swimlane;html=1;rounded=1;startSize=36;fillColor=#EAF2FF;strokeColor=#5B8DEF;fontColor=#174EA6;fontStyle=1;fontSize=14;" value="CLIENT PROCESS" vertex="1">
+                    <mxGeometry height="570" width="500" x="180" y="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="server-zone" parent="1" style="swimlane;html=1;rounded=1;startSize=36;fillColor=#EAF8F0;strokeColor=#42A66B;fontColor=#146C43;fontStyle=1;fontSize=14;" value="MCP SERVER PROCESS" vertex="1">
+                    <mxGeometry height="570" width="707" x="843" y="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="prompts" parent="server-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#42A66B;align=left;spacingLeft=12;" value="&lt;b&gt;Prompts&lt;/b&gt;&lt;br&gt;sales_pitch(...)&lt;br&gt;comparison_table()" vertex="1">
+                    <mxGeometry height="100" width="180" x="447" y="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="json" parent="server-zone" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF4CC;strokeColor=#D6A700;" value="&lt;b&gt;Catalog JSON&lt;/b&gt;&lt;br&gt;plans · features · pricing" vertex="1">
+                    <mxGeometry height="65" width="210" x="27" y="490" as="geometry"/>
+                </mxCell>
+                <mxCell id="fastmcp" parent="server-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDF5E7;strokeColor=#2D8A57;" value="&lt;b&gt;FastMCP entry point&lt;/b&gt;&lt;br&gt;product_assistant.server&lt;br&gt;protocol routing + schemas" vertex="1">
+                    <mxGeometry height="85" width="420" x="137" y="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-fast-prompts" edge="1" parent="server-zone" source="fastmcp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2D8A57;endArrow=block;endFill=1;" target="prompts">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="user" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CC;strokeColor=#D6A700;fontStyle=1;" value="User prompt" vertex="1">
+                    <mxGeometry height="60" width="120" x="20" y="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="env" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#94A3B8;align=left;spacingLeft=12;" value="&lt;b&gt;.env configuration&lt;/b&gt;&lt;br&gt;MODEL_PROVIDER=OLLAMA&lt;br&gt;OLLAMA_MODEL / BASE_URL / API_KEY&lt;br&gt;&lt;font color=&quot;#667085&quot;&gt;LM Studio settings remain independently defined&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="100" width="420" x="220" y="145" as="geometry"/>
+                </mxCell>
+                <mxCell id="factory" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B8DEF;" value="&lt;b&gt;Model provider factory&lt;/b&gt;&lt;br&gt;Reads the selector and only the selected provider&#39;s configuration" vertex="1">
+                    <mxGeometry height="80" width="190" x="240" y="275" as="geometry"/>
+                </mxCell>
+                <mxCell id="ollama" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#356AC3;" value="&lt;b&gt;ChatOllama&lt;/b&gt;&lt;br&gt;Ollama model&lt;br&gt;tool-calling LLM" vertex="1">
+                    <mxGeometry height="80" width="170" x="470" y="275" as="geometry"/>
+                </mxCell>
+                <mxCell id="agent" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#356AC3;fontSize=13;" value="&lt;b&gt;LangChain agent&lt;/b&gt;&lt;br&gt;System prompt + catalog context&lt;br&gt;chooses and invokes MCP tools" vertex="1">
+                    <mxGeometry height="90" width="400" x="240" y="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="adapter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B8DEF;" value="&lt;b&gt;MultiServerMCPClient&lt;/b&gt;&lt;br&gt;starts server with uv&lt;br&gt;converts MCP tools to LangChain tools" vertex="1">
+                    <mxGeometry height="85" width="400" x="240" y="535" as="geometry"/>
+                </mxCell>
+                <mxCell id="stdio" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EBFF;strokeColor=#8B5CF6;fontStyle=1;" value="MCP over stdio&lt;br&gt;&lt;font color=&quot;#667085&quot;&gt;requests / responses&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="110" x="700" y="365" as="geometry"/>
+                </mxCell>
+                <mxCell id="resources" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#42A66B;align=left;spacingLeft=12;" value="&lt;b&gt;Resources&lt;/b&gt;&lt;br&gt;plans://all&lt;br&gt;features://by_plan&lt;br&gt;pricing://current" vertex="1">
+                    <mxGeometry height="120" width="180" x="883" y="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="tools" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#42A66B;align=left;spacingLeft=12;" value="&lt;b&gt;Tools&lt;/b&gt;&lt;br&gt;estimate_cost(...)&lt;br&gt;generate_quote(...)" vertex="1">
+                    <mxGeometry height="120" width="180" x="1083" y="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="services" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#42A66B;" value="&lt;b&gt;Business services&lt;/b&gt;&lt;br&gt;validation · pricing · discounts" vertex="1">
+                    <mxGeometry height="100" width="180" x="1083" y="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-user-agent" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;endArrow=block;endFill=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="agent">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-env-factory" edge="1" parent="1" source="env" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5B8DEF;endArrow=block;endFill=1;" target="factory">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-factory-ollama" edge="1" parent="1" source="factory" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5B8DEF;endArrow=block;endFill=1;" target="ollama" value="creates">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-ollama-agent" edge="1" parent="1" source="ollama" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#356AC3;endArrow=block;endFill=1;" target="agent" value="reasoning + tool calls">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-agent-adapter" edge="1" parent="1" source="agent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#356AC3;endArrow=block;endFill=1;" target="adapter" value="tool invocation">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-adapter-stdio" edge="1" parent="1" source="adapter" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#8B5CF6;strokeWidth=2;endArrow=block;endFill=1;" target="stdio">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-stdio-fastmcp" edge="1" parent="1" source="stdio" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#8B5CF6;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="fastmcp">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="830" y="400"/>
+                            <mxPoint x="830" y="187.5"/>
+                        </Array>
+                        <mxPoint x="842.9999999999998" y="465" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-fast-res" edge="1" parent="1" source="fastmcp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2D8A57;endArrow=block;endFill=1;" target="resources" value="reads">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-fast-tools" edge="1" parent="1" source="fastmcp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2D8A57;endArrow=block;endFill=1;" target="tools" value="calls">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-tools-services" edge="1" parent="1" source="tools" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2D8A57;endArrow=block;endFill=1;" target="services">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-res-json" edge="1" parent="1" source="resources" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D6A700;endArrow=block;endFill=1;" target="json">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-services-json" edge="1" parent="1" source="services" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D6A700;endArrow=block;endFill=1;" target="json">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
