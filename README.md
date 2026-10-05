@@ -1,6 +1,6 @@
-# PoC - MCP Product Assistant
+# MCP Server Product Assistant
 
-MCP Product Assistant is a proof of concept MCP server for a SaaS sales use case.
+MCP Product Assistant is a MCP server for a SaaS sales use case.
 
 It allows an agent/LLM to:
 - query real data on plans, features, and pricing,
