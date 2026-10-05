@@ -61,7 +61,7 @@ uv run product-assistant-mcp
 
 ## LangChain client with a local LLM
 
-The example in `examples/langchain_client.py` connects LangChain to this MCP
+The example in `examples/langchain_client.py` connects a LangChain Agent to this MCP
 server over `stdio` and can use either LM Studio or Ollama as its model
 provider. LM Studio is the default. The client:
 
