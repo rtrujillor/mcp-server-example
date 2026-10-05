@@ -24,6 +24,13 @@ include = ["product_assistant*"]
 product-assistant-mcp = "product_assistant.server:main"
 
 [dependency-groups]
+client = [
+    "langchain>=1.0.0",
+    "langchain-mcp-adapters>=0.2.0",
+    "langchain-ollama>=1.0.0",
+    "langchain-openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+]
 dev = [
     "pytest>=8.3.0",
 ]

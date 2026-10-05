@@ -59,6 +59,66 @@ Installed script mode:
 uv run product-assistant-mcp
 ```
 
+## LangChain client with a local LLM
+
+The example in `examples/langchain_client.py` connects LangChain to this MCP
+server over `stdio` and can use either LM Studio or Ollama as its model
+provider. LM Studio is the default. The client:
+
+- loads the MCP catalog resources as grounded context,
+- exposes `estimate_cost` and `generate_quote` to the agent as LangChain tools,
+- and lets the model decide when a product question requires a tool call.
+
+Install the optional client dependencies, load a tool-capable model in your
+provider, and start its local server:
+
+```bash
+uv sync --group client
+```
+
+In another terminal, ask a question:
+
+```bash
+uv run --group client python examples/langchain_client.py \
+  "We have 22 users, 5 projects, and 100000 API requests per month. Which plan fits and what is the monthly cost?"
+```
+
+The model must support tool calling. Provider selection and connection settings
+live in the repository's `.env` file:
+
+```dotenv
+# LM Studio (default)
+MODEL_PROVIDER=lm_studio
+LM_STUDIO_MODEL=local-model
+LM_STUDIO_BASE_URL=http://localhost:1234/v1
+
+# To use Ollama instead:
+# MODEL_PROVIDER=ollama
+# OLLAMA_MODEL=llama3.1
+# OLLAMA_BASE_URL=http://localhost:11434
+```
+
+For example, download and run an Ollama model before selecting it:
+
+```bash
+ollama pull llama3.1
+```
+
+The generic `MODEL_NAME` and `MODEL_BASE_URL` variables override the selected
+provider's corresponding variables. Command-line options take highest
+precedence, so one-off overrides remain possible:
+
+```bash
+uv run --group client python examples/langchain_client.py \
+  --provider ollama \
+  --model llama3.1 \
+  "Create a yearly quote for 30 users on the professional plan."
+```
+
+If LM Studio requires authentication, set `LM_STUDIO_API_KEY`; otherwise the
+client supplies a harmless placeholder key. You do not need to start the MCP
+server separately: the LangChain MCP adapter launches it for each MCP session.
+
 ## Quick architecture
 
 - Entry point MCP: `src/product_assistant/server.py`
@@ -166,4 +226,3 @@ The PoC data is located in:
 ## Contribution
 
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
-
