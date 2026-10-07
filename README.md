@@ -1,6 +1,16 @@
 # MCP Server Product Assistant
 
-MCP Product Assistant is a MCP server for a SaaS sales use case.
+MCP Product Assistant is an MCP server for a SaaS sales use case.
+
+This repository is also a practical example for learning how to build and
+operate MCP servers. It aims to explain:
+
+- different approaches to developing MCP servers,
+- how to package an MCP server and its application data,
+- how to run a server locally or as a container image,
+- how to expose it through STDIO or Streamable HTTP transports,
+- and where authentication, HTTPS, and other security controls belong when an
+  MCP server is published remotely.
 
 It allows an agent/LLM to:
 - query real data on plans, features, and pricing,
@@ -96,6 +106,15 @@ For a deployed HTTPS endpoint, set an `https://` URL and normally terminate TLS
 at a reverse proxy or load balancer. If `MCP_API_KEY` is set, the client sends
 it as a bearer token; authentication must be enforced by the server, proxy, or
 API gateway.
+
+## Container execution
+
+The MCP server can run locally or be packaged as a container image using the
+repository's [`Dockerfile`](Dockerfile). The container uses Streamable HTTP and
+has been built and tested with Docker Desktop. When publishing the image
+remotely, HTTPS and authentication should be enforced by the hosting platform,
+reverse proxy, or API gateway; the current server does not validate bearer
+tokens itself.
 
 ## LangChain client with a local LLM
 
