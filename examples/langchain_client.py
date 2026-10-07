@@ -5,10 +5,12 @@ import asyncio
 import logging
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from langchain.agents import create_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from dotenv import load_dotenv
+from langgraph.checkpoint.memory import InMemorySaver
 
 from model_providers import ModelSettings, create_model
 from product_assistant.config import MCPSettings
@@ -18,17 +20,15 @@ from product_assistant.logging_config import configure_logging
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_PROMPT = (
-    "We have 22 users, 5 projects, and about 100,000 API requests per month. "
-    "Which product plan fits us, and what would it cost monthly?"
-)
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Ask a local model about the Product Assistant catalog."
+        description="Chat with a local model about the Product Assistant catalog."
     )
-    parser.add_argument("prompt", nargs="?", default=DEFAULT_PROMPT)
+    parser.add_argument(
+        "prompt",
+        nargs="?",
+        help="Optional first message; subsequent messages are read interactively.",
+    )
     return parser.parse_args()
 
 
@@ -63,9 +63,12 @@ def build_mcp_connection(
     }
 
 
-async def run(
-    prompt: str, model_settings: ModelSettings, mcp_settings: MCPSettings
-) -> None:
+async def create_product_agent(
+    model_settings: ModelSettings,
+    mcp_settings: MCPSettings,
+) -> Any:
+    """Create one stateful agent for the lifetime of the console chat."""
+
     project_root = Path(__file__).resolve().parents[1]
 
     # stdio launches the server as a child process. Streamable HTTP connects to
@@ -89,17 +92,11 @@ async def run(
         len(resources),
     )
 
-    logger.info(
-        "Invoking model provider=%s model=%s prompt_length=%d",
-        model_settings.provider,
-        model_settings.model,
-        len(prompt),
-    )
-
     model = create_model(model_settings)
-    agent = create_agent(
+    return create_agent(
         model=model,
         tools=tools,
+        checkpointer= InMemorySaver(),
         system_prompt=(
             "You are a product assistant. Answer only from the MCP catalog below. "
             "Use the MCP tools for every cost estimate or formal quote; never do "
@@ -109,9 +106,16 @@ async def run(
         ),
     )
 
+
+async def stream_response(agent: Any, prompt: str, thread_id: str) -> None:
+    """Stream one answer and persist the turn in the agent checkpoint."""
+
+    logger.info("Invoking model prompt_length=%d", len(prompt))
+    logger.debug("Prompt:\n%s", prompt)
     wrote_output = False
     async for message_chunk, _metadata in agent.astream(
         {"messages": [{"role": "user", "content": prompt}]},
+        config={"configurable": {"thread_id": thread_id}},
         stream_mode="messages",
     ):
         text = message_chunk.text
@@ -124,6 +128,41 @@ async def run(
     logger.info("Model invocation completed")
 
 
+async def run_chat(
+    initial_prompt: str | None,
+    model_settings: ModelSettings,
+    mcp_settings: MCPSettings,
+) -> None:
+    """Read prompts and stream answers until the user exits."""
+
+    agent = await create_product_agent(model_settings, mcp_settings)
+    thread_id = str(uuid4())
+    pending_prompt = initial_prompt
+
+    print("Product Assistant chat. Type /quit or /exit to leave.")
+    while True:
+        try:
+            if pending_prompt is not None:
+                prompt = pending_prompt
+                pending_prompt = None
+                print(f"You: {prompt}")
+            else:
+                prompt = await asyncio.to_thread(input, "\nYou: ")
+        except EOFError:
+            print("\nGoodbye!")
+            return
+
+        prompt = prompt.strip()
+        if not prompt:
+            continue
+        if prompt.lower() in {"/quit", "/exit"}:
+            print("Goodbye!")
+            return
+
+        print("Assistant: ", end="", flush=True)
+        await stream_response(agent, prompt, thread_id)
+
+
 async def main() -> None:
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
     configure_logging()
@@ -131,7 +170,9 @@ async def main() -> None:
     try:
         settings = ModelSettings.from_env()
         mcp_settings = MCPSettings.from_env()
-        await run(args.prompt, settings, mcp_settings)
+        await run_chat(args.prompt, settings, mcp_settings)
+    except KeyboardInterrupt:
+        print("\nGoodbye!")
     except Exception as exc:
         logger.exception("Client failed")
         raise SystemExit(1) from exc

@@ -114,12 +114,16 @@ provider, and start its local server:
 uv sync --group client
 ```
 
-In another terminal, ask a question:
+In another terminal, start the interactive console chat:
 
 ```bash
-uv run --group client python examples/langchain_client.py \
-  "We have 22 users, 5 projects, and 100000 API requests per month. Which plan fits and what is the monthly cost?"
+uv run --group client python examples/langchain_client.py
 ```
+
+Enter a message at the `You:` prompt. The client streams the answer, preserves
+the conversation across turns, and then waits for the next message. Type
+`/quit` or `/exit` to leave. You can optionally pass a command-line prompt as
+the first message before the interactive loop begins.
 
 The model must support tool calling. Provider selection and connection settings
 live in the repository's `.env` file:
