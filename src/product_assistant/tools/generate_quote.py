@@ -1,5 +1,6 @@
 """Generate quote tool."""
 from datetime import date, timedelta
+import logging
 from typing import Any, Dict, List, Literal, Optional
 
 from product_assistant.models import GenerateQuoteResult
@@ -10,6 +11,8 @@ from product_assistant.services import (
     get_plan_pricing,
     validate_minimum_users,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def generate_quote(
@@ -33,10 +36,23 @@ def generate_quote(
     Returns:
         GenerateQuoteResult with itemized costs, discounts, and validation
     """
+    logger.info(
+        "Generating quote plan=%s users=%d billing_cycle=%s",
+        plan_id,
+        users,
+        billing_cycle,
+    )
     valid_until = (date.today() + timedelta(days=14)).isoformat()
     trace: Dict[str, List[str]] = {"pricing://current": [], "plans://all": []}
 
     def _invalid(error: str, notes: List[str]) -> GenerateQuoteResult:
+        logger.warning(
+            "Quote rejected plan=%s users=%d billing_cycle=%s reason=%s",
+            plan_id,
+            users,
+            billing_cycle,
+            error,
+        )
         return GenerateQuoteResult(
             valid=False,
             currency="EUR",
@@ -136,7 +152,7 @@ def generate_quote(
     tax = 0.0
     total = round(subtotal - total_discount + tax, 2)
 
-    return GenerateQuoteResult(
+    result = GenerateQuoteResult(
         valid=is_valid,
         currency=currency,
         cycle=billing_cycle,
@@ -151,3 +167,11 @@ def generate_quote(
         valid_until=valid_until,
         trace=trace,
     )
+    logger.info(
+        "Quote generated plan=%s valid=%s currency=%s total=%.2f",
+        plan_id,
+        result.valid,
+        result.currency,
+        result.total,
+    )
+    return result

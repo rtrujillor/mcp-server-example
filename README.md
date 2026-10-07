@@ -73,7 +73,13 @@ MCP_PATH=/mcp
 # Used by the client only when STREAMABLE_HTTP is selected
 MCP_SERVER_URL=http://127.0.0.1:8000/mcp
 MCP_API_KEY=
+
+# DEBUG, INFO, WARNING, ERROR, or CRITICAL
+LOG_LEVEL=INFO
 ```
+
+Application logs are written to standard error. This is important for the
+`STDIO` transport because standard output is reserved for MCP protocol messages.
 
 With `STDIO`, the LangChain client launches `product-assistant-mcp` as a child
 process and communicates through its standard input and output. The server does
@@ -136,6 +142,10 @@ OLLAMA_API_KEY=
 Both configuration blocks stay defined. To switch to Ollama, change only the
 selector to `MODEL_PROVIDER=OLLAMA`. The client then reads the Ollama variables
 and credentials; it does not use the LM Studio configuration.
+
+The client streams model text to the console as it is generated. MCP tool calls
+continue to run inside the agent loop; their intermediate protocol messages are
+not printed as user-facing output.
 
 For example, download and run an Ollama model before selecting it:
 
