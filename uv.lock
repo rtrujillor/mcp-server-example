@@ -417,6 +417,7 @@ source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
     { name = "mcp", extra = ["cli"] },
+    { name = "python-dotenv" },
 ]
 
 [package.dev-dependencies]
@@ -425,7 +426,6 @@ client = [
     { name = "langchain-mcp-adapters" },
     { name = "langchain-ollama" },
     { name = "langchain-openai" },
-    { name = "python-dotenv" },
 ]
 dev = [
     { name = "pytest" },
@@ -435,6 +435,7 @@ dev = [
 requires-dist = [
     { name = "fastmcp", specifier = ">=3.0.2" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.26.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -443,7 +444,6 @@ client = [
     { name = "langchain-mcp-adapters", specifier = ">=0.2.0" },
     { name = "langchain-ollama", specifier = ">=1.0.0" },
     { name = "langchain-openai", specifier = ">=1.0.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
 ]
 dev = [{ name = "pytest", specifier = ">=8.3.0" }]
 

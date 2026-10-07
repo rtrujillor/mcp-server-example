@@ -4,12 +4,14 @@ import argparse
 import asyncio
 import sys
 from pathlib import Path
+from typing import Any
 
 from langchain.agents import create_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from dotenv import load_dotenv
 
 from model_providers import ModelSettings, create_model
+from product_assistant.config import MCPSettings
 
 
 DEFAULT_PROMPT = (
@@ -26,13 +28,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-async def run(prompt: str, settings: ModelSettings) -> str:
-    project_root = Path(__file__).resolve().parents[1]
+def build_mcp_connection(
+    settings: MCPSettings, project_root: Path
+) -> dict[str, dict[str, Any]]:
+    """Build the client connection for the selected MCP transport."""
 
-    # The adapter launches the MCP server as a child process over stdio. Using
-    # ``uv run`` means the server gets the same locked environment as this repo.
-    mcp_client = MultiServerMCPClient(
-        {
+    if settings.transport == "stdio":
+        return {
             "product_assistant": {
                 "transport": "stdio",
                 "command": "uv",
@@ -44,6 +46,28 @@ async def run(prompt: str, settings: ModelSettings) -> str:
                 ],
             }
         }
+
+    headers = {}
+    if settings.api_key:
+        headers["Authorization"] = f"Bearer {settings.api_key}"
+    return {
+        "product_assistant": {
+            "transport": "streamable_http",
+            "url": settings.server_url,
+            "headers": headers,
+        }
+    }
+
+
+async def run(
+    prompt: str, model_settings: ModelSettings, mcp_settings: MCPSettings
+) -> str:
+    project_root = Path(__file__).resolve().parents[1]
+
+    # stdio launches the server as a child process. Streamable HTTP connects to
+    # an already-running server and never starts another server process.
+    mcp_client = MultiServerMCPClient(
+        build_mcp_connection(mcp_settings, project_root)
     )
 
     # MCP tools become ordinary LangChain tools. Resources are read separately
@@ -55,7 +79,7 @@ async def run(prompt: str, settings: ModelSettings) -> str:
     )
     catalog = "\n\n".join(resource.as_string() for resource in resources)
 
-    model = create_model(settings)
+    model = create_model(model_settings)
     agent = create_agent(
         model=model,
         tools=tools,
@@ -79,7 +103,8 @@ async def main() -> None:
     args = parse_args()
     try:
         settings = ModelSettings.from_env()
-        answer = await run(args.prompt, settings)
+        mcp_settings = MCPSettings.from_env()
+        answer = await run(args.prompt, settings, mcp_settings)
     except Exception as exc:
         print(f"Client failed: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc

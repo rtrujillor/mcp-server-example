@@ -4,6 +4,7 @@ from typing import Any, Dict, Literal
 
 from mcp.server.fastmcp import FastMCP
 
+from product_assistant.config import MCPSettings
 from product_assistant.models import (
     EstimateCostResult,
     GenerateQuoteResult,
@@ -23,8 +24,15 @@ from product_assistant.tools import (
     generate_quote as _generate_quote,
 )
 
-# Initialize FastMCP instance
-mcp = FastMCP("Product Assistant")
+# Initialize FastMCP with the HTTP settings even when stdio is selected. The
+# host, port, and path are ignored by the stdio transport.
+mcp_settings = MCPSettings.from_env()
+mcp = FastMCP(
+    "Product Assistant",
+    host=mcp_settings.host,
+    port=mcp_settings.port,
+    streamable_http_path=mcp_settings.path,
+)
 
 # ---------------------------------------------------------------------------
 # Resources
@@ -117,8 +125,8 @@ def comparison_table() -> str:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    """Run the MCP server."""
-    mcp.run()
+    """Run the MCP server with the transport selected in .env."""
+    mcp.run(transport=mcp_settings.transport)
 
 
 if __name__ == "__main__":

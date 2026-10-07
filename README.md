@@ -28,7 +28,7 @@ Not a full chatbot: it's a layer of MCP capabilities (resources + tools + prompt
 ### Clone the repository
 
 ```bash
-git clone url_of_this_repository
+git clone https://github.com/rtrujillor/mcp-server-example
 
 cd global-mcp-poc
 ```
@@ -59,11 +59,43 @@ Installed script mode:
 uv run product-assistant-mcp
 ```
 
+The server transport is selected in `.env`:
+
+```dotenv
+# STDIO or STREAMABLE_HTTP
+MCP_TRANSPORT=STDIO
+
+# Used by the server only when STREAMABLE_HTTP is selected
+MCP_HOST=127.0.0.1
+MCP_PORT=8000
+MCP_PATH=/mcp
+
+# Used by the client only when STREAMABLE_HTTP is selected
+MCP_SERVER_URL=http://127.0.0.1:8000/mcp
+MCP_API_KEY=
+```
+
+With `STDIO`, the LangChain client launches `product-assistant-mcp` as a child
+process and communicates through its standard input and output. The server does
+not listen on a network port.
+
+With `STREAMABLE_HTTP`, start the server explicitly:
+
+```bash
+uv run product-assistant-mcp
+```
+
+The client connects to `MCP_SERVER_URL` and does not launch a server process.
+For a deployed HTTPS endpoint, set an `https://` URL and normally terminate TLS
+at a reverse proxy or load balancer. If `MCP_API_KEY` is set, the client sends
+it as a bearer token; authentication must be enforced by the server, proxy, or
+API gateway.
+
 ## LangChain client with a local LLM
 
-The example in `examples/langchain_client.py` connects a LangChain Agent to this MCP
-server over `stdio` and can use either LM Studio or Ollama as its model
-provider. LM Studio is the default. The client:
+The example in `examples/langchain_client.py` connects a LangChain Agent to this
+MCP server using the transport selected by `MCP_TRANSPORT`. It can use either
+LM Studio or Ollama as its model provider. LM Studio is the default. The client:
 
 - loads the MCP catalog resources as grounded context,
 - exposes `estimate_cost` and `generate_quote` to the agent as LangChain tools,
@@ -120,8 +152,9 @@ uv run --group client python examples/langchain_client.py \
 
 `LM_STUDIO_API_KEY` and `OLLAMA_API_KEY` are independent. An empty
 `OLLAMA_API_KEY` is appropriate for a local Ollama server; when populated, it
-is sent as a bearer token. You do not need to start the MCP server separately:
-the LangChain MCP adapter launches it for each MCP session.
+is sent as a bearer token. In `STDIO` mode, the LangChain MCP adapter launches
+the server. In `STREAMABLE_HTTP` mode, start the server separately before
+running the client.
 
 ## Quick architecture
 
@@ -129,10 +162,10 @@ the LangChain MCP adapter launches it for each MCP session.
 
 The diagram follows the Ollama path selected by `MODEL_PROVIDER=OLLAMA`. The
 same provider factory can create the LM Studio client instead, without changing
-the agent or MCP integration. The LangChain client starts the MCP server as a
-child process and communicates with it over `stdio`; catalog resources become
-grounding context, while MCP tools remain callable operations chosen by the
-model.
+the agent or MCP integration. With `STDIO`, the client starts the MCP server as
+a child process. With `STREAMABLE_HTTP`, it connects to the configured server
+URL. In either mode, catalog resources become grounding context while MCP tools
+remain callable operations chosen by the model.
 
 The editable draw.io source is available at
 [`docs/architecture.drawio`](docs/architecture.drawio). Open it in
