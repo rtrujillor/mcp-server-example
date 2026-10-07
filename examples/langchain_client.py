@@ -2,7 +2,7 @@
 
 import argparse
 import asyncio
-import sys
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +12,10 @@ from dotenv import load_dotenv
 
 from model_providers import ModelSettings, create_model
 from product_assistant.config import MCPSettings
+from product_assistant.logging_config import configure_logging
+
+
+logger = logging.getLogger(__name__)
 
 
 DEFAULT_PROMPT = (
@@ -61,7 +65,7 @@ def build_mcp_connection(
 
 async def run(
     prompt: str, model_settings: ModelSettings, mcp_settings: MCPSettings
-) -> str:
+) -> None:
     project_root = Path(__file__).resolve().parents[1]
 
     # stdio launches the server as a child process. Streamable HTTP connects to
@@ -69,6 +73,7 @@ async def run(
     mcp_client = MultiServerMCPClient(
         build_mcp_connection(mcp_settings, project_root)
     )
+    logger.info("Connecting to Product Assistant transport=%s", mcp_settings.transport)
 
     # MCP tools become ordinary LangChain tools. Resources are read separately
     # and supplied as grounded catalog context because models cannot call MCP
@@ -78,6 +83,19 @@ async def run(
         mcp_client.get_resources("product_assistant"),
     )
     catalog = "\n\n".join(resource.as_string() for resource in resources)
+    logger.info(
+        "Loaded MCP capabilities tools=%d resources=%d",
+        len(tools),
+        len(resources),
+    )
+
+    logger.info(
+        "Invoking model provider=%s model=%s prompt_length=%d",
+        model_settings.provider,
+        model_settings.model,
+        len(prompt),
+    )
+    logger.debug("Prompt:\n%s", prompt)
 
     model = create_model(model_settings)
     agent = create_agent(
@@ -92,23 +110,32 @@ async def run(
         ),
     )
 
-    result = await agent.ainvoke(
-        {"messages": [{"role": "user", "content": prompt}]}
-    )
-    return str(result["messages"][-1].content)
+    wrote_output = False
+    async for message_chunk, _metadata in agent.astream(
+        {"messages": [{"role": "user", "content": prompt}]},
+        stream_mode="messages",
+    ):
+        text = message_chunk.text
+        if text:
+            print(text, end="", flush=True)
+            wrote_output = True
+
+    if wrote_output:
+        print()
+    logger.info("Model invocation completed")
 
 
 async def main() -> None:
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+    configure_logging()
     args = parse_args()
     try:
         settings = ModelSettings.from_env()
         mcp_settings = MCPSettings.from_env()
-        answer = await run(args.prompt, settings, mcp_settings)
+        await run(args.prompt, settings, mcp_settings)
     except Exception as exc:
-        print(f"Client failed: {exc}", file=sys.stderr)
+        logger.exception("Client failed")
         raise SystemExit(1) from exc
-    print(answer)
 
 
 if __name__ == "__main__":

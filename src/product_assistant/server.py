@@ -1,10 +1,12 @@
 # server.py
 """Main MCP server entry point."""
+import logging
 from typing import Any, Dict, Literal
 
 from mcp.server.fastmcp import FastMCP
 
 from product_assistant.config import MCPSettings
+from product_assistant.logging_config import configure_logging
 from product_assistant.models import (
     EstimateCostResult,
     GenerateQuoteResult,
@@ -23,6 +25,8 @@ from product_assistant.tools import (
     estimate_cost as _estimate_cost,
     generate_quote as _generate_quote,
 )
+
+logger = logging.getLogger(__name__)
 
 # Initialize FastMCP with the HTTP settings even when stdio is selected. The
 # host, port, and path are ignored by the stdio transport.
@@ -126,6 +130,18 @@ def comparison_table() -> str:
 
 def main() -> None:
     """Run the MCP server with the transport selected in .env."""
+    configure_logging()
+    logger.info(
+        "Starting Product Assistant MCP server transport=%s",
+        mcp_settings.transport,
+    )
+    if mcp_settings.transport == "streamable-http":
+        logger.info(
+            "Listening for MCP connections host=%s port=%d path=%s",
+            mcp_settings.host,
+            mcp_settings.port,
+            mcp_settings.path,
+        )
     mcp.run(transport=mcp_settings.transport)
 
 

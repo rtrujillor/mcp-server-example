@@ -1,4 +1,5 @@
 """Estimate cost tool."""
+import logging
 from typing import Dict, List, Optional
 
 from product_assistant.models import EstimateCostResult, UsageProfile
@@ -9,6 +10,8 @@ from product_assistant.services import (
     get_plan_pricing,
     validate_plan_usage_limits,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def estimate_cost(
@@ -31,11 +34,22 @@ def estimate_cost(
     Returns:
         EstimateCostResult with itemized costs and validation
     """
+    logger.info(
+        "Estimating cost plan=%s users=%d",
+        plan,
+        usage.users,
+    )
     trace: Dict[str, List[str]] = {"pricing://current": [], "plans://all": []}
     # Always use monthly cycle for quick estimates
     cycle = "monthly"
 
     def _invalid(error: str, notes: List[str]) -> EstimateCostResult:
+        logger.warning(
+            "Cost estimate rejected plan=%s users=%d reason=%s",
+            plan,
+            usage.users,
+            error,
+        )
         return EstimateCostResult(
             valid=False,
             currency="EUR",
@@ -133,7 +147,7 @@ def estimate_cost(
         *global_notes,
     ]
 
-    return EstimateCostResult(
+    result = EstimateCostResult(
         valid=is_valid,
         currency=currency,
         plan=plan,
@@ -143,3 +157,11 @@ def estimate_cost(
         notes=notes,
         trace=trace,
     )
+    logger.info(
+        "Cost estimate generated plan=%s valid=%s currency=%s total=%.2f",
+        plan,
+        result.valid,
+        result.currency,
+        result.total_estimated_cost,
+    )
+    return result
