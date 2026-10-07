@@ -95,7 +95,6 @@ async def run(
         model_settings.model,
         len(prompt),
     )
-    logger.debug("Prompt:\n%s", prompt)
 
     model = create_model(model_settings)
     agent = create_agent(
