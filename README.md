@@ -172,7 +172,7 @@ running the client.
 
 ## Quick architecture
 
-![MCP Product Assistant architecture](docs/architecture.png)
+![MCP Product Assistant architecture](docs/physical-architecture.png)
 
 The diagram follows the Ollama path selected by `MODEL_PROVIDER=OLLAMA`. The
 same provider factory can create the LM Studio client instead, without changing
@@ -185,6 +185,12 @@ The editable draw.io source is available at
 [`docs/architecture.drawio`](docs/architecture.drawio). Open it in
 [draw.io](https://app.diagrams.net/) to change the layout or export another
 format.
+
+The local process and network deployment is documented separately in the
+editable [`docs/physical-architecture.drawio`](docs/physical-architecture.drawio)
+diagram. It shows the console client, the selectable LM Studio/Ollama model
+runtime, and the FastMCP Streamable HTTP web service as independent processes
+on one workstation.
 
 - Entry point MCP: `src/product_assistant/server.py`
 - Resources: `src/product_assistant/resources/`

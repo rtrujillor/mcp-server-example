@@ -1,0 +1,106 @@
+<mxfile host="65bd71144e">
+    <diagram id="physical-local-runtime" name="Local physical architecture">
+        <mxGraphModel dx="1393" dy="751" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=25;fontStyle=1;fontColor=#172B4D;" value="MCP Product Assistant — local physical architecture" vertex="1">
+                    <mxGeometry height="40" width="800" x="400" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="subtitle" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontColor=#667085;" value="Single developer workstation · independent OS processes · loopback-only network traffic" vertex="1">
+                    <mxGeometry height="28" width="800" x="400" y="58" as="geometry"/>
+                </mxCell>
+                <mxCell id="host" parent="1" style="swimlane;html=1;rounded=1;startSize=40;fillColor=#F8FAFC;strokeColor=#475569;strokeWidth=2;fontColor=#334155;fontStyle=1;fontSize=14;" value="LOCAL WORKSTATION (macOS / Linux / Windows)" vertex="1">
+                    <mxGeometry height="690" width="1520" x="40" y="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="terminal-zone" parent="host" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#EAF2FF;strokeColor=#5B8DEF;fontColor=#174EA6;fontStyle=1;fontSize=13;" value="TERMINAL SESSION" vertex="1">
+                    <mxGeometry height="565" width="430" x="30" y="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="client-process" parent="terminal-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#356AC3;strokeWidth=2;fontSize=13;" value="&lt;b&gt;Python 3.14 client process&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot;&gt;uv run --group client python&lt;br&gt;examples/langchain_client.py&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="82" width="360" x="35" y="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="console" parent="terminal-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CC;strokeColor=#D6A700;align=left;spacingLeft=12;" value="&lt;b&gt;Interactive console&lt;/b&gt;&lt;br&gt;stdin: user prompts&lt;br&gt;stdout: streamed answers" vertex="1">
+                    <mxGeometry height="92" width="160" x="35" y="172" as="geometry"/>
+                </mxCell>
+                <mxCell id="langchain" parent="terminal-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#356AC3;" value="&lt;b&gt;LangChain / LangGraph&lt;/b&gt;&lt;br&gt;create_agent&lt;br&gt;InMemorySaver" vertex="1">
+                    <mxGeometry height="92" width="160" x="235" y="172" as="geometry"/>
+                </mxCell>
+                <mxCell id="provider-factory" parent="terminal-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B8DEF;" value="&lt;b&gt;Model provider adapter&lt;/b&gt;&lt;br&gt;ChatOpenAI or ChatOllama&lt;br&gt;&lt;font color=&quot;#667085&quot;&gt;selected by MODEL_PROVIDER&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="82" width="360" x="35" y="310" as="geometry"/>
+                </mxCell>
+                <mxCell id="mcp-adapter" parent="terminal-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8B5CF6;" value="&lt;b&gt;langchain-mcp-adapters&lt;/b&gt;&lt;br&gt;MultiServerMCPClient&lt;br&gt;resources + callable tools" vertex="1">
+                    <mxGeometry height="82" width="360" x="35" y="437" as="geometry"/>
+                </mxCell>
+                <mxCell id="models-zone" parent="host" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#FFF7E8;strokeColor=#E09F3E;fontColor=#9A5B13;fontStyle=1;fontSize=13;" value="LOCAL MODEL RUNTIME (choose one)" vertex="1">
+                    <mxGeometry height="305" width="410" x="505" y="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="lm-process" parent="models-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E09F3E;strokeWidth=2;" value="&lt;b&gt;LM Studio process&lt;/b&gt;&lt;br&gt;Local Inference Server&lt;br&gt;OpenAI-compatible REST API&lt;br&gt;&lt;font color=&quot;#667085&quot;&gt;localhost:1234/v1&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="140" width="170" x="25" y="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="ollama-process" parent="models-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E09F3E;strokeWidth=2;" value="&lt;b&gt;Ollama process&lt;/b&gt;&lt;br&gt;Local model runner&lt;br&gt;Ollama HTTP API&lt;br&gt;&lt;font color=&quot;#667085&quot;&gt;localhost:11434&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="140" width="170" x="215" y="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="model-files" parent="models-zone" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF4CC;strokeColor=#D6A700;" value="&lt;b&gt;Local model weights&lt;/b&gt;&lt;br&gt;tool-calling-capable model&lt;br&gt;&lt;font color=&quot;#667085&quot;&gt;managed by the selected runtime&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="62" width="200" x="105" y="220" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-lm-weights" edge="1" parent="models-zone" source="lm-process" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D6A700;endArrow=block;endFill=1;" target="model-files">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-ollama-weights" edge="1" parent="models-zone" source="ollama-process" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D6A700;endArrow=block;endFill=1;" target="model-files">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="server-zone" parent="host" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#EAF8F0;strokeColor=#42A66B;fontColor=#146C43;fontStyle=1;fontSize=13;" value="LOCAL WEB SERVER PROCESS" vertex="1">
+                    <mxGeometry height="565" width="525" x="960" y="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="server-process" parent="server-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2D8A57;strokeWidth=2;fontSize=13;" value="&lt;b&gt;Python 3.14 MCP server process&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot;&gt;uv run product-assistant-mcp&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="72" width="455" x="35" y="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="http-listener" parent="server-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDF5E7;strokeColor=#2D8A57;strokeWidth=2;" value="&lt;b&gt;FastMCP web service&lt;/b&gt;&lt;br&gt;mcp.server.fastmcp.FastMCP&lt;br&gt;Streamable HTTP endpoint&lt;br&gt;&lt;font color=&quot;#146C43&quot;&gt;127.0.0.1:8000/mcp&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="96" width="455" x="35" y="157" as="geometry"/>
+                </mxCell>
+                <mxCell id="mcp-components" parent="server-zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#42A66B;" value="&lt;b&gt;Product Assistant package&lt;/b&gt;&lt;br&gt;MCP resources · tools · prompts&lt;br&gt;Pydantic models · business services" vertex="1">
+                    <mxGeometry height="90" width="455" x="35" y="290" as="geometry"/>
+                </mxCell>
+                <mxCell id="json-store" parent="server-zone" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFF4CC;strokeColor=#D6A700;" value="&lt;b&gt;Local filesystem&lt;/b&gt;&lt;br&gt;src/product_assistant/data&lt;br&gt;plans.json · features.json · pricing.json" vertex="1">
+                    <mxGeometry height="92" width="325" x="100" y="420" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-listener-components" edge="1" parent="server-zone" source="http-listener" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#2D8A57;endArrow=block;endFill=1;" target="mcp-components" value="dispatch">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-components-json" edge="1" parent="server-zone" source="mcp-components" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D6A700;endArrow=block;endFill=1;" target="json-store" value="file reads">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="network-note" parent="host" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4EBFF;strokeColor=#8B5CF6;fontColor=#5B21B6;align=left;spacingLeft=12;" value="&lt;b&gt;Network boundary&lt;/b&gt;&lt;br&gt;All HTTP connections use the loopback interface; no cloud service or external infrastructure is required." vertex="1">
+                    <mxGeometry height="65" width="360" x="530" y="565" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-console-agent" edge="1" parent="host" source="console" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#356AC3;endArrow=block;endFill=1;startArrow=block;startFill=1;" target="langchain" value="prompt / answer">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-agent-provider" edge="1" parent="host" source="langchain" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#356AC3;endArrow=block;endFill=1;" target="provider-factory" value="inference">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-agent-mcp" edge="1" parent="host" source="langchain" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#8B5CF6;endArrow=block;endFill=1;" target="mcp-adapter" value="tool calls">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-provider-lm" edge="1" parent="host" source="provider-factory" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E09F3E;strokeWidth=2;endArrow=block;endFill=1;dashed=1;exitX=1;exitY=0.35;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="models-zone" value="HTTP / JSON (OpenAI API)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-mcp-http" edge="1" parent="host" source="mcp-adapter" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#8B5CF6;strokeWidth=3;endArrow=block;endFill=1;startArrow=block;startFill=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="http-listener" value="MCP · Streamable HTTP">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="670" y="543"/>
+                            <mxPoint x="670" y="425"/>
+                            <mxPoint x="950" y="425"/>
+                            <mxPoint x="950" y="294"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-env-client" edge="1" parent="host" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#94A3B8;dashed=1;endArrow=open;endFill=0;" target="client-process">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="530" y="495" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
